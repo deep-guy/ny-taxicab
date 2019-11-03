@@ -7,6 +7,8 @@ def getNewString(s):
     # Extracting the values from the string
     s = s.strip()
     lst = s.split(',')
+    if (len(lst) != 7):
+        return str(lst[0]) + "0,0,0,0,0,0"
     pickup_lst = lst[1].strip().split(' ')
     year_lst = pickup_lst[0].strip().split('-')
     time_lst = pickup_lst[1].strip().split(':')
@@ -27,13 +29,15 @@ def getNewString(s):
     ans = lst[0] + ',' + "{0:.5f}".format(minutes_sin) + ',' + "{0:.5f}".format(minutes_cos) + ',' + "{0:.3f}".format(weekday_sin) + ',' + "{0:.3f}".format(weekday_cos) + ',' + "{0:.4f}".format(month_sin) + ',' + "{0:.4f}".format(month_cos) + ',' + lst[2] + ',' + lst[3] + ',' + lst[4] + ',' + lst[5] 
     return ans
 
-# I had to remove the header line (feature names) in the files for this to work
+fname = "data/test.csv"
+newfname = "data/test_mod.csv"
 
-fp1 = open('data/test.csv', 'r')
-fp2 = open('data/test_mod.csv', 'w')
-fp1.readline
-fp2.write("key,minutes_sin,minutes_cos,weekday_sin,weekday_cos,month_sin,month_cos,pickup_longitude,pickup_latitude,dropoff_longitude,dropoff_latitude,passenger_count")
-for line in fp1:
-    fp2.write(getNewString(line) + '\n')
-fp1.close()
-fp2.close()
+with open(fname, 'r') as fp1:
+    fp2 = open(newfname, 'w')
+    line = fp1.readline()
+    line = fp1.readline()
+    fp2.write("key,minutes_sin,minutes_cos,weekday_sin,weekday_cos,month_sin,month_cos,pickup_longitude,pickup_latitude,dropoff_longitude,dropoff_latitude,passenger_count")
+    while line:
+        fp2.write(getNewString(line) + '\n')
+        line = fp1.readline()
+    fp2.close()
