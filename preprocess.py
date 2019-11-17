@@ -64,6 +64,22 @@ def preprocess(df):
     df = df[df['passenger_count'] > 0]
     return df
 
+
+# Function to calculate distance between two points and add it as a feature
+import haversine
+def distance(df):
+    rows = df.shape[0]
+    dist_arr = [0]*rows
+    for i in range(rows):
+        pickup = (df.pickup_latitude[i], df.pickup_longitude[i]
+        dropoff = (df.dropoff_latitude[i], df.dropoff_longitude[i])
+        dist_arr[i] = haversine(pickup, dropoff)
+    
+    df['distance'] = dist_arr
+    return df
+
+
+
 # Points in wata are bad..
 import matplotlib.pyplot as plt
 nyc_bounds = (-74.5, -72.8, 40.5, 41.8)
