@@ -68,6 +68,15 @@ def preprocess(df):
 import matplotlib.pyplot as plt
 nyc_bounds = (-74.5, -72.8, 40.5, 41.8)
 
+def select_within_bounds(df, bounds):
+    pickup_indices = (df.pickup_longitude >= bounds[0]) & (df.pickup_longitude <= bounds[1]) & \
+        (df.pickup_latitude >= bounds[2]) & (df.pickup_longitude <= bounds[3])
+
+    dropoff_indices = (df.dropoff_longitude >= bounds[0]) & (df.dropoff_longitude <= bounds[1]) & \
+        (df.dropoff_latitude >= bounds[2]) & (df.dropoff_longitude <= bounds[3])
+
+    return pickup_indices & dropoff_indices
+
 def map_to_nyc_mask(longitude, latitude, points_x, points_y, bounds):
     x = (points_x * (longitude - bounds[0]) / (bounds[1] - bounds[0])).astype('int')
     y = (points_y - points_y * (latitude - bounds[2]) / (bounds[3] - bounds[2])).astype('int')
@@ -76,6 +85,9 @@ def map_to_nyc_mask(longitude, latitude, points_x, points_y, bounds):
 def remove_points_in_water(df):
     # Create a mask of the New York City with 1 as land and 0 as water
     nyc_mask = plt.imread('img/nyc_map.png')[:,:,0] > 0.9
+
+    # Remove points outside New York
+    df = df[select_within_bounds(df, nyc_bounds)]
 
     # Map the latitudes and longitudes to the points in the map
     pickup_x, pickup_y = map_to_nyc_mask(df.pickup_longitude, df.pickup_latitude, nyc_mask.shape[1], nyc_mask.shape[0], nyc_bounds)
