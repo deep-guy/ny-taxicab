@@ -61,7 +61,7 @@ def preprocess(df):
     df['year'] = year
 
     # Remove 0 passenger count
-    df = df[df['passenger_count'] >= 0]
+    df = df[df['passenger_count'] > 0]
     return df
 
 if __name__=="__main__":
