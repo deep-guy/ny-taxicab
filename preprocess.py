@@ -64,6 +64,28 @@ def preprocess(df):
     df = df[df['passenger_count'] > 0]
     return df
 
+# Points in wata are bad..
+import matplotlib.pyplot as plt
+nyc_bounds = (-74.5, -72.8, 40.5, 41.8)
+
+def map_to_nyc_mask(longitude, latitude, points_x, points_y, bounds):
+    x = (points_x * (longitude - bounds[0]) / (bounds[1] - bounds[0])).astype('int')
+    y = (points_y - points_y * (latitude - bounds[2]) / (bounds[3] - bounds[2])).astype('int')
+    return x,y
+
+def remove_points_in_water(df):
+    # Create a mask of the New York City with 1 as land and 0 as water
+    nyc_mask = plt.imread('img/nyc_map.png')[:,:,0] > 0.9
+
+    # Map the latitudes and longitudes to the points in the map
+    pickup_x, pickup_y = map_to_nyc_mask(df.pickup_longitude, df.pickup_latitude, nyc_mask.shape[1], nyc_mask.shape[0], nyc_bounds)
+    dropoff_x, dropoff_y = map_to_nyc_mask(df.dropoff_longitude, df.dropoff_latitude, nyc_mask.shape[1], nyc_mask.shape[0], nyc_bounds)
+
+    # Compute the indices where pickup and dropoff locations are on land
+    indices = nyc_mask[pickup_x, pickup_y] & nyc_mask[dropoff_x, dropoff_y]
+
+    return df[indices]
+
 if __name__=="__main__":
     import sys
     path = sys.argv[1]
