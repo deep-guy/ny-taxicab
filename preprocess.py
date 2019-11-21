@@ -47,18 +47,10 @@ def preprocess(df):
     time_column = df['pickup_datetime'].to_numpy()
     df = df.drop(columns=['pickup_datetime', 'key'])
 
-    time_of_day = time_of_day_vec(time_column)
-    day_of_week = day_of_week_vec(time_column)
-    month = month_vec(time_column)
-    year = year_vec(time_column)
-
-    df['sin_time_of_day'] = np.sin(time_of_day)
-    df['cos_time_of_day'] = np.cos(time_of_day)
-    df['sin_day_of_week'] = np.sin(day_of_week)
-    df['cos_day_of_week'] = np.cos(day_of_week)
-    df['sin_month'] = np.sin(month)
-    df['cos_month'] = np.cos(month)
-    df['year'] = year
+    df['time_of_day'] = time_of_day_vec(time_column)
+    df['day_of_week'] = day_of_week_vec(time_column)
+    df['month'] = month_vec(time_column)
+    df['year'] = year_vec(time_column)
 
     # Remove 0 passenger count
     df = df[df['passenger_count'] > 0]
