@@ -100,7 +100,7 @@ def preprocess(df):
     time_of_day = time_of_day_vec(time_column)
     day_of_week = day_of_week_vec(time_column)
     month = month_vec(time_column)
-    year = year_vec(time_column)
+    df['year'] = year_vec(time_column)
 
     df['sin_time_of_day'] = np.sin(time_of_day)
     df['cos_time_of_day'] = np.cos(time_of_day)
@@ -136,6 +136,39 @@ def preprocess(df):
 
     return df
 
+def preprocess_test(df):
+    print("Initial number of points: ", df.shape[0])
+    # Cyclise time
+    time_column = df['pickup_datetime'].to_numpy()
+    df = df.drop(columns=['pickup_datetime'])
+
+    time_of_day = time_of_day_vec(time_column)
+    day_of_week = day_of_week_vec(time_column)
+    month = month_vec(time_column)
+    df['year'] = year_vec(time_column)
+
+    df['sin_time_of_day'] = np.sin(time_of_day)
+    df['cos_time_of_day'] = np.cos(time_of_day)
+    df['sin_day_of_week'] = np.sin(day_of_week)
+    df['cos_day_of_week'] = np.cos(day_of_week)
+    df['sin_month'] = np.sin(month)
+    df['cos_month'] = np.cos(month)
+
+    # Make illegal passenger_counts null
+    df = df.mask(df['passenger_count'] <= 0)
+    df = df.mask(df['passenger_count'] > 7)
+
+    # Add distance column
+    df['distance'] = dist_vector(df['pickup_latitude'].to_numpy(), df['pickup_longitude'].to_numpy(),
+                     df['dropoff_latitude'].to_numpy(), df['dropoff_longitude'].to_numpy())
+    df = df.reset_index(drop=True)
+
+    # Impute the null points with mean
+    df = df.fillna(df.mean())
+
+    print("Final number of points:", df.shape[0])
+    return df
+
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 def scale(df):
     mm_scaler = MinMaxScaler()
@@ -154,9 +187,18 @@ def scale(df):
 
 if __name__=="__main__":
     import sys
-    path = sys.argv[1]
-    target_path = sys.argv[2]
-    df = pd.read_csv(path, nrows=10000000, low_memory=False)
-    preprocessed_df = preprocess(df)
-    scaled_df = scale(preprocessed_df)
-    scaled_df.to_csv(target_path, index=False)
+    flag = sys.argv[1]
+    path = sys.argv[2]
+    target_path = sys.argv[3]
+    if flag == 'train':
+        df = pd.read_csv(path, nrows=10000000, low_memory=False)
+        preprocessed_df = preprocess(df)
+        scaled_df = scale(preprocessed_df)
+        print(scaled_df.head())
+        scaled_df.to_csv(target_path, index=False)
+    elif flag == 'test':
+        df = pd.read_csv(path, low_memory=False)
+        preprocessed_df = preprocess_test(df)
+        scaled_df = scale(preprocessed_df)
+        print(scaled_df.head())
+        scaled_df.to_csv(target_path, index=False)
