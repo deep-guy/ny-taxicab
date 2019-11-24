@@ -185,6 +185,32 @@ def scale(df):
     df[std_features] = pd.DataFrame(std_scaler.transform(df[std_features]), columns=std_features)
     return df
 
+
+def is_valid(p_lat, p_long, d_lat, d_long):
+    bounds = (-74.5, -72.8, 40.5, 41.8)
+    if ((p_long >= bounds[0]) & (p_long <= bounds[1]) & (p_lat >= bounds[2]) & (p_lat <= bounds[3])):
+        if (d_long >= bounds[0]) & (d_long <= bounds[1]) & (d_lat >= bounds[2]) & (d_lat <= bounds[3]):
+            return 0
+    else:
+        return 1
+
+valid_vec = np.vectorize(is_valid)
+
+def make_invalid_water(invalid_col):
+    if (invalid_col == 1):
+        return 1
+    else:
+        return 2
+inv_vec = np.vectorize(make_invalid_water)
+
+def get_water_invalid(df):
+    df2 = remove_points_in_water(df)
+    df_diff = pd.concat([df,df2]).drop_duplicates(keep=False)
+    df_diff['invalid'] = inv_vec(df.invalid)
+    df = pd.concat([df2, df_diff])
+    df.reset_index(inplace = True)
+    return df
+
 if __name__=="__main__":
     import sys
     flag = sys.argv[1]
