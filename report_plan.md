@@ -24,6 +24,12 @@
     - Therefore, added a new feature 'distance_to_JFK'
     - Training on LightGBM: Best score yet
 
+### Approach 4: k-means clustering
+    - Did k means clustering taking 20% of the total data for training for each models
+    - no. of folds = 10
+    - 10 models created. Model with best result on test data chosen for submission.
+    - Did not perform too well on unseen test data. Possible explanation: Overfitting
+
 ### Approach 4: Boosting results 
     - There are 3 airports in NY: Distance of pickup to each added as a feature.
     - Trained model on XGBoost
